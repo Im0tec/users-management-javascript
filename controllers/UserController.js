@@ -1,59 +1,90 @@
 class UserController{
 
     constructor(formId, tableId){
-        this.formE1 = document.getElementById(formId);
-        this.tableId = document.getElementById(tableId);
+        this.formEl = document.getElementById(formId);
+        this.tableEl = document.getElementById(tableId);
     
         this.onSubmit();
     }
 
     onSubmit(){
 
-        this.formE1.addEventListener("submit", event =>{
+        this.formEl.addEventListener("submit", event => {
    
             event.preventDefault();
-            let values = this.getValues();
-            values.photo = "";
 
-            this.getPhoto((content) =>{
+            let btn = this.formEl.querySelector("[type=submit]");
+            btn.disabled = true;
+
+            let values = this.getValues();
+
+            this.getPhoto().then((content) => {
                 
                 values.photo = content
                 this.addLine(values);
+
+                this.formEl.reset();
+
+                btn.disabled = false;
+            }, (e) => {
+                console.error(e);
             });
+            
         });
     }//onSubmit
 
-    getPhoto(callback){
-        let fileReader = new FileReader();
+    getPhoto(){
 
-        let elements = [...this.formE1.elements].filter(item =>{
+        return new Promise((resolve, reject)=>{
             
-            if(item.name === 'photo'){
-                return item;
+            let fileReader = new FileReader();
+    
+            let elements = [...this.formEl.elements].filter(item =>{
+                
+                if(item.name === 'photo'){
+                    return item;
+                }
+            });
+            
+            let file = elements[0].files[0];
+            
+            fileReader.onload = () =>{
+                
+                resolve(fileReader.result);
+            };
+
+            fileReader.onerror = (e)=>{
+                reject(e);
+            };
+    
+            if(file){
+
+                fileReader.readAsDataURL(file);
+            
+            }else {
+
+                resolve('dist/img/boxed-bg.jpg');
             }
         });
-        
-        let file = elements[0].files[0];
-        
-        fileReader.onload = () =>{
-            
-            callback(fileReader.result);
-        };
-
-        fileReader.readAsDataURL(file);
     }//getPhoto
 
     getValues(){
 
         let user = {};
         
-        [...this.formE1.elements].forEach(function(field, index){
+        [...this.formEl.elements].forEach(function(field, index){
       
             if(field.name == "gender"){
                
                if(field.checked){
                   user[field.name] = field.value;
                }
+
+            } 
+            else if(field.name == "admin") {
+
+                user[field.name] = field.checked;
+
             }
             else{
                
@@ -67,19 +98,19 @@ class UserController{
 
     addLine(dataUser){
         
-        this.tableId.innerHTML = `
-           <tr>
-              <td><img src="${dataUser.photo}" alt="User Image" class="img-circle img-sm"></td>
-              <td>${dataUser.name}</td>
-              <td>${dataUser.email}</td>
-              <td>${dataUser.admin}</td>
-              <td>${dataUser.birth}</td>
-              <td>
-              <button type="button" class="btn btn-primary btn-xs btn-flat">Editar</button>
-              <button type="button" class="btn btn-danger btn-xs btn-flat">Excluir</button>
-              </td>
-           </tr>
+        let tr = document.createElement('tr');
+        
+        tr.innerHTML = `
+            <td><img src="${dataUser.photo}" alt="User Image" class="img-circle img-sm"></td>
+            <td>${dataUser.name}</td>
+            <td>${dataUser.email}</td>
+            <td>${(dataUser.admin) ? 'Sim' : 'Não'}</td>
+            <td>${dataUser.birth}</td>
+            <td>
+            <button type="button" class="btn btn-primary btn-xs btn-flat">Editar</button>
+            <button type="button" class="btn btn-danger btn-xs btn-flat">Excluir</button>
+            </td>
         `;
-     
+        this.tableEl.appendChild(tr);
     }//addLine
 }
