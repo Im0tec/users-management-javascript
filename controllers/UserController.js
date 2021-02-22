@@ -7,6 +7,7 @@ class UserController{
     
         this.onSubmit();
         this.onEdit();
+        this.selectAll();
     }
 
     onEdit(){
@@ -21,6 +22,7 @@ class UserController{
             event.preventDefault();
 
             let btn = this.formUpdateEl.querySelector("[type=submit]");
+            
             btn.disabled = true;
 
             let values = this.getValues(this.formUpdateEl);
@@ -40,27 +42,22 @@ class UserController{
                     result._photo = content;
                 }
 
-                tr.dataset.user = JSON.stringify(result);
+                let user = new User();
 
-                tr.innerHTML = `
-                <td><img src="${result._photo}" alt="User Image" class="img-circle img-sm"></td>
-                <td>${result._name}</td>
-                <td>${result._email}</td>
-                <td>${(result._admin) ? 'Sim' : 'Não'}</td>
-                <td>${Utils.dateFormat(result._register)}</td>
-                <td>
-                    <button type="button" class="btn btn-primary btn-edit btn-xs btn-flat">Editar</button>
-                    <button type="button" class="btn btn-danger btn-xs btn-flat">Excluir</button>
-                </td>
-                `;
+                user.loadFromJSON(result);
+
+                user.save();
+
+                this.getTr(user, tr);
 
                 this.addEventsTr(tr);
+                
                 this.updateCount();
 
-                this.formUpdateEl.reset();
-
                 btn.disabled = false;
-
+                
+                this.formUpdateEl.reset();
+                
                 this.showPanelCreate();
 
             }, (e) => {
@@ -69,7 +66,8 @@ class UserController{
 
             });
         });
-    }
+    }//onEdit
+
     onSubmit(){
 
         this.formEl.addEventListener("submit", event => {
@@ -86,8 +84,10 @@ class UserController{
             this.getPhoto(this.formEl).then((content) => {
                 
                 values.photo = content
-                this.addLine(values);
 
+               values.save();
+
+                this.addLine(values);
 
                 this.formEl.reset();
 
@@ -177,10 +177,35 @@ class UserController{
     
     }//getValues
 
+    selectAll(){
+
+        let users = User.getUsersStorage();
+
+        users.forEach(dataUser => {
+            
+            let user = new User();
+
+            user.loadFromJSON(dataUser);
+
+            this.addLine(user);
+
+        });
+    }//selectAll
+
     addLine(dataUser){
         
-        let tr = document.createElement('tr');
-        
+        let tr = this.getTr(dataUser);
+
+        this.tableEl.appendChild(tr);
+
+        this.updateCount();
+
+    }//addLine
+
+    getTr(dataUser, tr = null){
+
+        if(tr === null) tr = document.createElement('tr');
+
         tr.dataset.user = JSON.stringify(dataUser);
 
         tr.innerHTML = `
@@ -197,22 +222,26 @@ class UserController{
 
         this.addEventsTr(tr);
         
-        this.tableEl.appendChild(tr);
+        return tr;
 
-        this.updateCount();
-    }//addLine
+    }//getTr
 
     addEventsTr(tr){
 
-        tr.querySelector(".btn-delete").addEventListener("click", e=>{
+        tr.querySelector(".btn-delete").addEventListener("click", e => {
+ 
+            if (confirm("Deseja Excluir ?")) {
 
-            if(confirm("Confirme a exclusão.")){
-                
+                let user = new User();
+
+                user.loadFromJSON(JSON.parse(tr.dataset.user));
+                user.remove();
+
                 tr.remove();
-                
                 this.updateCount();
             }
-        });
+ 
+        }); 
 
         tr.querySelector(".btn-edit").addEventListener("click", e=>{
             
@@ -233,7 +262,7 @@ class UserController{
                             break;
                         
                         case 'radio':
-                            field = this.formUpdateEl.querySelector("[name=" + name.replace("_","") + "][value="+ json[name] +"]");
+                            field = this.formUpdateEl.querySelector("[name=" + name.replace("_","") + "][value="+ json[name] + "]");
                             field.checked = true;
                             break;
                         
@@ -250,17 +279,19 @@ class UserController{
             this.formUpdateEl.querySelector(".photo").src = json._photo;
             this.showPanelUpdate();
         });
-    }
+    }//addEventsTr
+
     showPanelCreate(){
         document.querySelector("#box-user-create").style.display = "block";
         document.querySelector("#box-user-update").style.display = "none";
-    }
+    }//showPanelCreate
 
     showPanelUpdate(){
 
         document.querySelector("#box-user-create").style.display = "none";
         document.querySelector("#box-user-update").style.display = "block";
-    }
+    }//showPanelUpdate
+
     updateCount(){
 
         let numberUsers = 0;
@@ -277,5 +308,5 @@ class UserController{
 
         document.querySelector("#number-users").innerHTML = numberUsers;
         document.querySelector("#number-users-admin").innerHTML = numberAdmin;
-    }
+    }//updateCount
 }
