@@ -10,6 +10,7 @@ class UserController{
         this.selectAll();
     }
 
+    
     onEdit(){
 
         document.querySelector("#box-user-update .btn-cancel").addEventListener("click", e=>{
