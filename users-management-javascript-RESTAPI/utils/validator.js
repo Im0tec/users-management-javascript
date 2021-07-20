@@ -2,9 +2,9 @@ module.exports = {
 
     user:(app, req, res) =>{
 
-        req.assert('name', 'Nome obrigatório!').notEmpty();
-        req.assert('email', 'Email obrigatório!').notEmpty();
-        req.assert('password', 'Senha obrigatório!').notEmpty();
+        req.assert('_name', 'Nome obrigatório!').notEmpty();
+        req.assert('_email', 'Email obrigatório!').notEmpty();
+        req.assert('_password', 'Senha obrigatório!').notEmpty();
 
         let errors = req.validationErrors();
 
