@@ -46,25 +46,27 @@ class UserController{
 
                 user.loadFromJSON(result);
 
-                user.save();
+                user.save().then(user => {
 
-                this.getTr(user, tr);
+                    this.getTr(user, tr);
 
-                this.addEventsTr(tr);
-                
-                this.updateCount();
+                    this.addEventsTr(tr);
+                    
+                    this.updateCount();
 
-                btn.disabled = false;
-                
-                this.formUpdateEl.reset();
-                
-                this.showPanelCreate();
+                    btn.disabled = false;
+                    
+                    this.formUpdateEl.reset();
+                    
+                    this.showPanelCreate();
+                });
 
             }, (e) => {
 
                 console.error(e);
 
             });
+
         });
     }//onEdit
 
@@ -85,13 +87,14 @@ class UserController{
                 
                 values.photo = content
 
-               values.save();
+                values.save().then(user => {
 
-                this.addLine(values);
+                    this.addLine(user);
 
-                this.formEl.reset();
+                    this.formEl.reset();
 
-                btn.disabled = false;
+                    btn.disabled = false;
+                });
 
             }, (e) => {
 
