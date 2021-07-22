@@ -1,12 +1,9 @@
-module.exports = (app)=>{
-    
-    app.get('', (req, res) =>{
-    
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/html');
-        res.end('<h1>Aloha</h1>Servidor Rodando...');
-        console.log('URL:',req.url);
-        console.log('METHOD:',req.method);
-    });
+var express = require('express');
+var router = express.Router();
 
-}
+/* GET home page. */
+router.get('/', function(req, res, next) {
+  res.render('index', { title: 'Express' });
+});
+
+module.exports = router;

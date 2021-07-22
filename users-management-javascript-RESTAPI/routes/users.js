@@ -1,93 +1,67 @@
-let neDB = require('nedb');
-let db = new neDB({
-    filename:'users.db',
-    autoload:true
+var express = require('express');
+var restify = require('restify-clients');
+var assert = require('assert');
+var router = express.Router();
+
+// Creates a JSON client
+var client = restify.createJsonClient({
+  url: 'http://localhost:4000'
 });
 
-module.exports = (app) =>{
+/* GET users listing. */
+router.get('/', function(req, res, next) {
+  
+  client.get('/users', function (err, request, response, obj) {
     
-    let route = app.route('/users');
+    assert.ifError(err);
+
+    res.json(obj);
+  });
+
+});
+
+router.get('/:id', function(req, res, next) {
+  
+  client.get(`/users/${req.params.id}`, function (err, request, response, obj) {
     
-    route.get((req, res) =>{
-        
-        db.find({}).sort({name:1}).exec((err, users) =>{
-            
-            if(err){
+    assert.ifError(err);
 
-                app.utils.error.send(err, req, res);
-            }
-            else{
+    res.json(obj);
+  });
+
+});
+
+router.post('/', function(req, res, next) {
+  
+  client.post('/users', req.body,function (err, request, response, obj) {
     
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                res.json({
-                    users
-                });
-            }
-        });
-    });
+    assert.ifError(err);
 
-    route.post((req, res) =>{
+    res.json(obj);
+  });
 
-        if (!app.utils.validator.user(app, req, res)) return false;
+});
 
-        db.insert(req.body, (err, user) =>{
-
-            if(err){
-
-                app.utils.error.send(err, req, res);
-            }
-            else{
-                res.status(200).json(user);
-            }
-        });
-    });
-
-    let routeId = app.route('/users/:id');
-
-    routeId.get((req , res) =>{
-
-        db.findOne({_id:req.params.id}).exec((err, user) => {
-            
-            if(err){
-
-                app.utils.error.send(err, req, res);
-            }
-            else{
-                res.status(200).json(user);
-            }
-        });
+router.put('/:id', function(req, res, next) {
+  
+  client.put(`/users/${req.params.id}`, req.body,function (err, request, response, obj) {
     
-    });
+    assert.ifError(err);
+
+    res.json(obj);
+  });
+
+});
+
+router.delete('/:id', function(req, res, next) {
+  
+  client.del(`/users/${req.params.id}`, function (err, request, response, obj) {
     
-    routeId.put((req , res) =>{
+    assert.ifError(err);
 
-        if (!app.utils.validator.user(app, req, res)) return false;
-        
-        db.update({_id: req.params.id}, req.body, err => {
-            
-            if(err){
+    res.json(obj);
+  });
 
-                app.utils.error.send(err, req, res);
-            }
-            else{
-                res.status(200).json(req.body);
-            }
-        });
-    
-    });
+});
 
-    routeId.delete((req, res) =>{
-        db.remove({_id: req.params.id}, {}, err =>{
-
-            if(err){
-
-                app.utils.error.send(err, req, res);
-            }
-            else{
-                res.status(200).json(req.params);
-            }
-        });
-    });
-    
-}
+module.exports = router;
