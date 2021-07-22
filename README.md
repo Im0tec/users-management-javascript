@@ -4,7 +4,7 @@ A simple project to study Javascript based on HCODEBR course, available on Udemy
 ### Running the project:
 After clone the repository.
 - **WEB APPLICATION 💻**:
-1. Open the "client-server" folder.
+1. Open the "users-management-javascript-RESTAPI" folder.
 2. Initialize the terminal inside the folder.
 3. Type the command below in the terminal:
 ```shell script
@@ -17,7 +17,7 @@ http://localhost:3000
 5. READY ✨🎉  
 ----
 - **SERVER 💻**:
-1. Open the "users-management-javascript-RESTAPI" folder.
+1. Open the "client-server" folder.
 2. Initialize the terminal inside the folder.
 3. Type the command below in the terminal:
 ```shell script
